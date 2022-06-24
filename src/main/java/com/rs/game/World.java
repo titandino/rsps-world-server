@@ -1003,7 +1003,7 @@ public final class World {
 					Logger.handle(e);
 				}
 			}
-		}, Utils.clampI(ticks - 1, 0, Integer.MAX_VALUE));
+		}, Utils.clampI(ticks, 0, Integer.MAX_VALUE));
 		return true;
 	}
 
@@ -1135,7 +1135,7 @@ public final class World {
 	}
 
 	public static final GroundItem addGroundItem(Item item, WorldTile tile, Player owner, boolean invisible, int hiddenTime, DropMethod type, int deleteTime) {
-		if (owner == null || (item.getId() == -1) || owner.getRights() == Rights.ADMIN)
+		if ((item.getId() == -1) || (owner != null && owner.getRights() == Rights.ADMIN))
 			return null;
 		if (type != DropMethod.NORMAL)
 			if (type == DropMethod.TURN_UNTRADEABLES_TO_COINS && !ItemConstants.isTradeable(item)) {
@@ -1149,7 +1149,7 @@ public final class World {
 		if (floorItem.getAmount() > 1 && !item.getDefinitions().isStackable() && floorItem.getMetaData() == null)
 			for (int i = 0; i < floorItem.getAmount(); i++) {
 				Item oneItem = new Item(item.getId(), 1);
-				GroundItem newItem = new GroundItem(oneItem, tile, owner.getUsername(), invisible ? GroundItemType.INVISIBLE : GroundItemType.NORMAL);
+				GroundItem newItem = new GroundItem(oneItem, tile, owner == null ? null : owner.getUsername(), invisible ? GroundItemType.INVISIBLE : GroundItemType.NORMAL);
 				finalizeGroundItem(newItem, tile, owner, hiddenTime, type, deleteTime);
 			}
 		else

@@ -16,10 +16,17 @@
 //
 package com.rs.game.content.skills.dungeoneering.npcs.combat;
 
+import static com.rs.game.content.skills.dungeoneering.DungeonConstants.GuardianMonster.NECROMANCER;
+import static com.rs.game.content.skills.dungeoneering.DungeonConstants.GuardianMonster.REBORN_MAGE;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.rs.game.model.entity.Entity;
 import com.rs.game.model.entity.npc.NPC;
-import com.rs.game.model.entity.npc.combat.CombatScript;
-import com.rs.game.model.entity.npc.combat.CombatScriptsHandler;
+import com.rs.game.model.entity.npc.combat.Default;
 import com.rs.game.model.entity.player.Player;
 import com.rs.game.tasks.WorldTask;
 import com.rs.game.tasks.WorldTasks;
@@ -27,15 +34,7 @@ import com.rs.lib.game.Animation;
 import com.rs.lib.game.SpotAnim;
 import com.rs.utils.Ticks;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.rs.game.content.skills.dungeoneering.DungeonConstants.GuardianMonster.NECROMANCER;
-import static com.rs.game.content.skills.dungeoneering.DungeonConstants.GuardianMonster.REBORN_MAGE;
-
-public class AntiSilkHoodMages extends CombatScript {
+public class AntiSilkHoodMages extends Default {//default combat script
 
 	@Override
 	public Object[] getKeys() {//Get necromancer/reborn mages as Object array of ints
@@ -58,7 +57,7 @@ public class AntiSilkHoodMages extends CombatScript {
 			sendAntiSilkHoodSpell(npc, player);
 			return 5;//delay 5 ticks for spell
 		}
-		return CombatScriptsHandler.attack(npc, target);
+		return super.attack(npc, target);
 	}
 	private void sendAntiSilkHoodSpell(NPC npc, final Player player) {
 		int animation = 6293;
