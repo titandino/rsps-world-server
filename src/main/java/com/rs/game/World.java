@@ -33,9 +33,9 @@ import com.rs.cores.CoresManager;
 import com.rs.cores.WorldThread;
 import com.rs.db.WorldDB;
 import com.rs.game.content.ItemConstants;
-import com.rs.game.content.controllers.DuelController;
 import com.rs.game.content.controllers.PuroPuroController;
 import com.rs.game.content.controllers.WildernessController;
+import com.rs.game.content.minigames.duel.DuelController;
 import com.rs.game.content.minigames.partyroom.PartyRoom;
 import com.rs.game.content.world.regions.dungeons.LivingRockCavern;
 import com.rs.game.model.WorldProjectile;
@@ -300,7 +300,7 @@ public final class World {
 		int regionId = entity.getRegionId();
 		if (entity.getLastRegionId() != regionId || entity.isForceUpdateEntityRegion()) {
 			if (entity instanceof Player player) {
-				if(Settings.getConfig().isDebug() && player.hasStarted() && Music.getGenre(regionId) == null
+				if(Settings.getConfig().isDebug() && player.hasStarted() && Music.getGenre(player) == null
                         && !(World.getRegion(player.getRegionId()) instanceof DynamicRegion))
 					player.sendMessage(regionId + " has no music genre!");
 				if (entity.getLastRegionId() > 0)
@@ -322,8 +322,8 @@ public final class World {
                  * if there is no controller and the region and playing genres don't match, play a song
                  * same if there is a controller but check if the controller allows region play.
                  */
-				if(player.hasStarted() && (Music.getGenre(regionId) == null || player.getMusicsManager().getPlayingGenre() == null
-                        || !player.getMusicsManager().getPlayingGenre().matches(Music.getGenre(regionId)))) {//tested, looks good.
+				if(player.hasStarted() && (Music.getGenre(player) == null || player.getMusicsManager().getPlayingGenre() == null
+                        || !player.getMusicsManager().getPlayingGenre().matches(Music.getGenre(player)))) {//tested, looks good.
                     if (player.getControllerManager().getController() == null) {
                         player.getMusicsManager().nextAmbientSong();
                     } else if (player.getControllerManager().getController().playAmbientOnControllerRegionEnter() && !player.getDungManager().isInsideDungeon()) { //if we start the dungeon controller before the region enter we can get rid of that inside dungeon thing.
