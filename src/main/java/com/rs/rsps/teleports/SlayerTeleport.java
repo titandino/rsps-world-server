@@ -2,8 +2,8 @@ package com.rs.rsps.teleports;
 
 import com.rs.game.content.bosses.godwars.GodwarsController;
 import com.rs.game.content.skills.slayer.TaskMonster;
-import com.rs.game.content.world.regions.dungeons.UndergroundDungeonController;
-import com.rs.game.content.world.regions.dungeons.ancientcavern.KuradalDungeonController;
+import com.rs.game.content.world.areas.dungeons.UndergroundDungeonController;
+import com.rs.game.content.world.areas.dungeons.ancientcavern.KuradalDungeonController;
 import com.rs.lib.game.WorldTile;
 
 import java.util.HashMap;
