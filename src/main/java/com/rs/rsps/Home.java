@@ -5,7 +5,7 @@ import com.rs.game.World;
 import com.rs.game.content.combat.CombatDefinitions.Spellbook;
 import com.rs.game.content.dialogue.Dialogue;
 import com.rs.game.content.dialogue.Options;
-import com.rs.game.content.world.regions.wilderness.WildernessController;
+import com.rs.game.content.world.areas.wilderness.WildernessController;
 import com.rs.game.model.entity.npc.NPC;
 import com.rs.game.model.entity.pathing.Direction;
 import com.rs.game.model.object.GameObject;
