@@ -22,11 +22,14 @@ import java.util.List;
 import com.rs.game.content.controllers.FightKilnController;
 import com.rs.game.model.entity.Entity;
 import com.rs.game.model.entity.npc.NPC;
+import com.rs.game.model.entity.pathing.Direction;
 import com.rs.lib.game.SpotAnim;
 import com.rs.lib.game.WorldTile;
 import com.rs.lib.util.Utils;
 
 public class HarAken extends NPC {
+	
+	private static final int TENTACLE_CAP = 25;
 
 	private long time;
 	private long spawnTentacleTime;
@@ -39,6 +42,8 @@ public class HarAken extends NPC {
 		underLava = !underLava;
 		if (time == 0)
 			spawnTentacleTime = System.currentTimeMillis() + 9000;
+		if(tentacles.size() == TENTACLE_CAP)
+			spawnTentacleTime = System.currentTimeMillis() + 25000;
 		time = System.currentTimeMillis() + (underLava ? 43000 : 31000);
 	}
 
@@ -47,11 +52,17 @@ public class HarAken extends NPC {
 		return true;
 	}
 
+	@Override
+	public boolean canMove(Direction dir) {
+		return false;
+	}
+
 	public HarAken(int id, WorldTile tile, FightKilnController controller) {
 		super(id, tile, true);
 		setForceMultiArea(true);
 		this.controller = controller;
 		tentacles = new ArrayList<>();
+		setCantFollowUnderCombat(true);
 	}
 
 	@Override
@@ -82,7 +93,7 @@ public class HarAken extends NPC {
 					resetTimer();
 				} else
 					controller.hideHarAken();
-			if (spawnTentacleTime < System.currentTimeMillis())
+			if (tentacles.size() < TENTACLE_CAP && spawnTentacleTime < System.currentTimeMillis())
 				spawnTentacle();
 
 		}
@@ -90,7 +101,7 @@ public class HarAken extends NPC {
 
 	public void spawnTentacle() {
 		tentacles.add(new HarAkenTentacle(Utils.random(2) == 0 ? 15209 : 15210, controller.getTentacleTile(), this));
-		spawnTentacleTime = System.currentTimeMillis() + Utils.random(20000, 30000);
+		spawnTentacleTime = System.currentTimeMillis() + Utils.random(18000, 23000);
 	}
 
 	public void removeTentacles() {
