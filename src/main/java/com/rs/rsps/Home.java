@@ -76,6 +76,7 @@ public class Home {
 
 	private static Teleport[] PVP_TELEPORTS = {
 			new Teleport("Mage bank (SAFE)", new WorldTile(2539, 4715, 0)),
+			new Teleport("Clan Wars (SAFE)", new WorldTile(2997, 9680, 0)),
 			new Teleport("Wests (level 10)", new WorldTile(2976, 3597, 0), p -> p.getControllerManager().startController(new WildernessController())),
 			new Teleport("Chaos altar (level 12)", new WorldTile(3229, 3609, 0), p -> p.getControllerManager().startController(new WildernessController())),
 			new Teleport("Dark warrior's fortress (level 15)", new WorldTile(3007, 3632, 0), p -> p.getControllerManager().startController(new WildernessController())),
