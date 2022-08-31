@@ -127,7 +127,7 @@ public class Home {
 								if (t != null)
 									option(t.getName(), new Dialogue().addNext(() -> t.teleport(e.getPlayer())));
 								else
-									option("Nowhere.");
+									option("Nowhere.", () -> {});
 						}
 					}));
 		}
