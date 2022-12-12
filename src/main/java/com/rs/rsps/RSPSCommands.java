@@ -18,7 +18,7 @@ public class RSPSCommands {
 		});
 		
 		Commands.add(Rights.PLAYER, "clanwars", "Teleports the player to clan wars.", (p, args) -> {
-			Magic.sendNormalTeleportSpell(p, new WorldTile(2997, 9680, 0));
+			Magic.sendNormalTeleportSpell(p, WorldTile.of(2997, 9680, 0));
 		});
 	}
 
