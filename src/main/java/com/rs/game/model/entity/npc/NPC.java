@@ -57,8 +57,11 @@ import com.rs.game.model.item.ItemsContainer;
 import com.rs.game.tasks.WorldTasks;
 import com.rs.lib.Constants;
 import com.rs.lib.game.Animation;
+import com.rs.lib.game.GroundItem;
 import com.rs.lib.game.Item;
 import com.rs.lib.game.WorldTile;
+import com.rs.lib.net.packets.encoders.Sound;
+import com.rs.lib.net.packets.encoders.Sound.SoundType;
 import com.rs.lib.util.Logger;
 import com.rs.lib.util.Utils;
 import com.rs.plugin.PluginManager;
@@ -102,7 +105,6 @@ public class NPC extends Entity {
 	// npc masks
 	private transient Transformation nextTransformation;
 	private transient NPCBodyMeshModifier bodyMeshModifier;
-	private transient int basAnim = -1;
 	protected transient ConcurrentHashMap<Object, Object> temporaryAttributes;
 	// name changing masks
 	private String name;
@@ -123,7 +125,7 @@ public class NPC extends Entity {
 	public NPC(int id, WorldTile tile, Direction direction, boolean permaDeath) {
 		super(tile);
 		this.id = id;
-		respawnTile = new WorldTile(tile);
+		respawnTile = WorldTile.of(tile);
 		setSpawned(permaDeath);
 		combatLevel = -1;
 		setHitpoints(getMaxHitpoints());
@@ -186,7 +188,7 @@ public class NPC extends Entity {
 
 	@Override
 	public boolean needMasksUpdate() {
-		return super.needMasksUpdate() || nextTransformation != null || bodyMeshModifier != null || basAnim != -1 || changedCombatLevel || changedName || maskTest || permName;
+		return super.needMasksUpdate() || nextTransformation != null || bodyMeshModifier != null || getBas() != -1 || changedCombatLevel || changedName || maskTest || permName;
 	}
 
 	public void resetLevels() {
@@ -225,8 +227,8 @@ public class NPC extends Entity {
 		changedName = false;
 		if (bodyMeshModifier == NPCBodyMeshModifier.RESET)
 			bodyMeshModifier = null;
-		if (basAnim == -2)
-			basAnim = -1;
+		if (getBas() == -2)
+			setBasNoReset(-1);
 	}
 
 	public NPCDefinitions getDefinitions(Player player) {
@@ -273,8 +275,8 @@ public class NPC extends Entity {
 		//Restore combat stats
 		if (getTickCounter() % 100 == 0)
 			restoreTick();
-		if (!combat.process() && routeEvent == null)
-			if (!isForceWalking() && !cantInteract && !checkAggressivity() && !hasEffect(Effect.FREEZE))
+		if (!combat.process() && routeEvent == null) {
+			if (!isForceWalking() && !cantInteract && !checkAggressivity() && !hasEffect(Effect.FREEZE)) {
 				if (!hasWalkSteps() && shouldRandomWalk()) {
 					boolean can = Math.random() > 0.9;
 					if (can) {
@@ -290,6 +292,8 @@ public class NPC extends Entity {
 							DumbRouteFinder.addDumbPathfinderSteps(this, respawnTile, getDefinitions().hasAttackOption() ? 7 : 3, getClipType());
 					}
 				}
+			}
+		}
 		if (isForceWalking())
 			if (!hasEffect(Effect.FREEZE))
 				if (getX() != forceWalk.getX() || getY() != forceWalk.getY()) {
@@ -302,7 +306,7 @@ public class NPC extends Entity {
 								break;
 					}
 					if (!hasWalkSteps()) { // failing finding route
-						setNextWorldTile(new WorldTile(forceWalk));
+						setNextWorldTile(WorldTile.of(forceWalk));
 						forceWalk = null; // so ofc reached forcewalk place
 					}
 				} else
@@ -316,7 +320,7 @@ public class NPC extends Entity {
 			super.processEntity();
 			processNPC();
 		} catch (Throwable e) {
-			Logger.handle(NPC.class, "processEntity", e);
+			Logger.handle(NPC.class, "processEntityNPC", e);
 		}
 	}
 
@@ -412,7 +416,7 @@ public class NPC extends Entity {
 	public void setRespawnTask(int time) {
 		if (!hasFinished()) {
 			reset();
-			getTile().setLocation(respawnTile);
+			setTile(respawnTile);
 			finish();
 		}
 		CoresManager.schedule(() -> spawn(), time < 0 ? getCombatDefinitions().getRespawnDelay() : time);
@@ -476,6 +480,8 @@ public class NPC extends Entity {
 		final NPCCombatDefinitions defs = getCombatDefinitions();
 		getInteractionManager().forceStop();
 		resetWalkSteps();
+		if (combat.getTarget() != null)
+			combat.getTarget().setAttackedByDelay(0);
 		combat.removeTarget();
 		if (source.getAttackedBy() == NPC.this) {
 			source.setAttackedBy(null);
@@ -487,14 +493,14 @@ public class NPC extends Entity {
 			if (loop == 0) {
 				setNextAnimation(new Animation(defs.getDeathEmote()));
 				if (source instanceof Player p)
-					playSound(getCombatDefinitions().getDeathSound(), 1);
+					soundEffect(getCombatDefinitions().getDeathSound(), 1);
 			}
 			else if (loop >= defs.getDeathDelay()) {
 				if (source instanceof Player player)
 					player.getControllerManager().processNPCDeath(NPC.this);
 				drop();
 				reset();
-				getTile().setLocation(respawnTile);
+				setTile(respawnTile);
 				finish();
 				if (!isSpawned())
 					setRespawnTask();
@@ -649,13 +655,7 @@ public class NPC extends Entity {
 			World.broadcastLoot(dropTo.getDisplayName() + " has just received a " + item.getName() + " drop from " + getDefinitions().getName() + "!");
 
 		final int size = getSize();
-
-		//final WorldTile tile = new WorldTile(getCoordFaceX(size), getCoordFaceY(size), getPlane());
-		int value = item.getDefinitions().getValue() * item.getAmount();
-		if (value > player.getI("lootbeamThreshold", 90000) || item.getDefinitions().name.contains("Scroll box") || item.getDefinitions().name.contains(" defender") || yellDrop(item.getId()))
-			player.sendMessage("<col=cc0033>You received: "+ item.getAmount() + " " + item.getDefinitions().getName()); //
-		//player.getPackets().sendTileMessage("<shad=000000>"+item.getDefinitions().getName() + " (" + item.getAmount() + ")", tile, 20000, 50, 0xFF0000);
-
+		
 		PluginManager.handle(new NPCDropEvent(dropTo, this, item));
 		if (item.getId() != -1 && dropTo.getNSV().getB("sendingDropsToBank")) {
 			if (item.getDefinitions().isNoted())
@@ -663,7 +663,10 @@ public class NPC extends Entity {
 			sendDropDirectlyToBank(dropTo, item);
 			return;
 		}
-		World.addGroundItem(item, new WorldTile(getCoordFaceX(size), getCoordFaceY(size), getPlane()), dropTo, true, 60);
+		GroundItem gItem = World.addGroundItem(item, WorldTile.of(getCoordFaceX(size), getCoordFaceY(size), getPlane()), dropTo, true, 60);
+		int value = item.getDefinitions().getValue() * item.getAmount();
+		if (gItem != null && (value > player.getI("lootbeamThreshold", 90000) || item.getDefinitions().name.contains("Scroll box") || item.getDefinitions().name.contains(" defender") || yellDrop(item.getId())))
+			player.getPackets().sendGroundItemMessage(50, 0xFF0000, gItem, "<shad=000000><col=cc0033>You received: "+ item.getAmount() + " " + item.getDefinitions().getName());
 	}
 
 	public static void sendDropDirectlyToBank(Player player, Item item) {
@@ -857,7 +860,7 @@ public class NPC extends Entity {
 	}
 
 	protected void setRespawnTile(WorldTile respawnTile) {
-		this.respawnTile = new WorldTile(respawnTile);
+		this.respawnTile = WorldTile.of(respawnTile);
 	}
 
 	public boolean isUnderCombat() {
@@ -1311,10 +1314,49 @@ public class NPC extends Entity {
 		this.ignoreNPCClipping = ignoreNPCClipping;
 	}
 	
-	public void playSound(int soundId, int type) {
-		if (soundId == -1)
-			return;
-		World.playSound(this, soundId, type);
+	private Sound playSound(Sound sound) {
+		World.playSound(this, sound);
+		return sound;
+	}
+	
+	private Sound playSound(int soundId, int delay, SoundType type) {
+		return playSound(new Sound(soundId, delay, type));
+	}
+	
+	public void jingle(int jingleId, int delay) {
+		playSound(jingleId, delay, SoundType.JINGLE);
+	}
+	
+	public void jingle(int jingleId) {
+		playSound(jingleId, 0, SoundType.JINGLE);
+	}
+	
+	public void musicTrack(int trackId, int delay, int volume) {
+		playSound(trackId, delay, SoundType.MUSIC).volume(volume);
+	}
+	
+	public void musicTrack(int trackId, int delay) {
+		playSound(trackId, delay, SoundType.MUSIC);
+	}
+	
+	public void musicTrack(int trackId) {
+		musicTrack(trackId, 100);
+	}
+	
+	public void soundEffect(int soundId, int delay) {
+		playSound(soundId, delay, SoundType.EFFECT);
+	}
+	
+	public void soundEffect(int soundId) {
+		soundEffect(soundId, 0);
+	}
+	
+	public void voiceEffect(int voiceId, int delay) {
+		playSound(voiceId, delay, SoundType.VOICE);
+	}
+	
+	public void voiceEffect(int voiceId) {
+		voiceEffect(voiceId, 0);
 	}
 
 	public NPCBodyMeshModifier getBodyMeshModifier() {
@@ -1336,18 +1378,6 @@ public class NPC extends Entity {
 	
 	public void resetMesh() {
 		setBodyMeshModifier(NPCBodyMeshModifier.RESET);
-	}
-
-	public int getBasAnim() {
-		return basAnim;
-	}
-
-	public void setBasAnim(int basAnim) {
-		if (basAnim == -1) {
-			this.basAnim = -2;
-			return;
-		}
-		this.basAnim = basAnim;
 	}
 
 	public boolean isHidden() {

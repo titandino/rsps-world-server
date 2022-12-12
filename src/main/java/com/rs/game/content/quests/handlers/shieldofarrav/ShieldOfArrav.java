@@ -432,33 +432,26 @@ public class ShieldOfArrav extends QuestOutline {
                 p.getPackets().sendGameMessage("You find nothing of interest to you.");
             }
         }
-    };
+	};
 
-    public static ItemClickHandler handleClickOnArravBook = new ItemClickHandler(BOOK) {
-        @Override
-        public void handle(ItemClickEvent e) {
-            if (e.getOption().equalsIgnoreCase("read"))
-                BookShieldOfArrav.openBook(e.getPlayer());
-            if (e.getOption().equalsIgnoreCase("drop")) {
-                e.getPlayer().getInventory().deleteItem(e.getSlotId(), e.getItem());
-                World.addGroundItem(e.getItem(), new WorldTile(e.getPlayer().getTile()), e.getPlayer());
-                e.getPlayer().getPackets().sendSound(2739, 0, 1);
-            }
-        }
-    };
+	public static ItemClickHandler handleClickOnArravBook = new ItemClickHandler(new Object[] { BOOK }, new String[] { "Read" }) {
+		@Override
+		public void handle(ItemClickEvent e) {
+			BookShieldOfArrav.openBook(e.getPlayer());
+		}
+	};
 
-    public static ItemClickHandler handleClickOnIntelReport = new ItemClickHandler(761) {
-        @Override
-        public void handle(ItemClickEvent e) {
-            if (e.getOption().equalsIgnoreCase("read"))
-                e.getPlayer().sendMessage("It seems to have intel on the Phoenix gang");
-        }
-    };
+	public static ItemClickHandler handleClickOnIntelReport = new ItemClickHandler(new Object[] { 761 }, new String[] { "Read" }) {
+		@Override
+		public void handle(ItemClickEvent e) {
+			e.getPlayer().sendMessage("It seems to have intel on the Phoenix gang");
+		}
+	};
 
     public static ObjectClickHandler handlePhoenixGangDoor = new ObjectClickHandler(new Object[]{2397}) {
         @Override
         public void handle(ObjectClickEvent e) {
-            if (e.getObject().matches(new WorldTile(3247, 9779, 0))) {
+            if (e.getObject().getTile().matches(WorldTile.of(3247, 9779, 0))) {
                 if (e.getOption().equalsIgnoreCase("open")) {
                     if (!ShieldOfArrav.isStageInPlayerSave(e.getPlayer(), ShieldOfArrav.JOINED_PHOENIX_STAGE) && e.getPlayer().getY() > e.getObject().getY()) {
                         e.getPlayer().startConversation(new Dialogue().addNPC(644, HeadE.FRUSTRATED, "Hey! You can't go in there. Only authorised personnel of" +
@@ -476,7 +469,7 @@ public class ShieldOfArrav extends QuestOutline {
     public static ObjectClickHandler handleBlackArmGangDoor = new ObjectClickHandler(new Object[]{2399}) {
         @Override
         public void handle(ObjectClickEvent e) {
-            if (e.getObject().matches(new WorldTile(3185, 3388, 0))) {
+            if (e.getObject().getTile().matches(WorldTile.of(3185, 3388, 0))) {
                 if (e.getOption().equalsIgnoreCase("open")) {
                     if (!ShieldOfArrav.isStageInPlayerSave(e.getPlayer(), ShieldOfArrav.JOINED_BLACK_ARM_STAGE) && e.getPlayer().getY() < e.getObject().getY()) {
                         e.getPlayer().sendMessage("The door seems to be locked from the inside.");
@@ -495,7 +488,7 @@ public class ShieldOfArrav extends QuestOutline {
         public void handle(ObjectClickEvent e) {
             Player p = e.getPlayer();
             GameObject obj = e.getObject();
-            if (!obj.matches(new WorldTile(3235, 9761, 0)))
+            if (!obj.getTile().matches(WorldTile.of(3235, 9761, 0)))
                 return;
             if (e.getOption().equalsIgnoreCase("open")) {
                 p.setNextAnimation(new Animation(536));
@@ -527,7 +520,7 @@ public class ShieldOfArrav extends QuestOutline {
         public void handle(ObjectClickEvent e) {
             Player p = e.getPlayer();
             GameObject obj = e.getObject();
-            if (!obj.matches(new WorldTile(3189, 3385, 1)))
+            if (!obj.getTile().matches(WorldTile.of(3189, 3385, 1)))
                 return;
             if (e.getOption().equalsIgnoreCase("open")) {
                 p.setNextAnimation(new Animation(536));
@@ -565,7 +558,7 @@ public class ShieldOfArrav extends QuestOutline {
         @Override
         public void handle(ObjectClickEvent e) {
             GameObject obj = e.getObject();
-            if (!obj.matches(new WorldTile(3251, 3386, 0)))
+            if (!obj.getTile().matches(WorldTile.of(3251, 3386, 0)))
                 return;
             if (e.getPlayer().getInventory().containsItem(WEAPONS_KEY, 1) || e.getPlayer().getY() < obj.getY())
                 Doors.handleDoor(e.getPlayer(), e.getObject());
@@ -596,7 +589,7 @@ public class ShieldOfArrav extends QuestOutline {
     };
 
     public static PickupItemHandler handlePhoenixBowsPickup = new PickupItemHandler(new Object[] {PHOENIX_CROSSBOW},
-			new WorldTile(3245, 3385, 1)) {
+			WorldTile.of(3245, 3385, 1)) {
         @Override
         public void handle(PickupItemEvent e) {
             List<NPC> npcs = World.getNPCsInRegion(e.getPlayer().getRegionId());

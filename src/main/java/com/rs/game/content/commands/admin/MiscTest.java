@@ -113,6 +113,11 @@ public class MiscTest {
 		//
 		//		});
 		
+		Commands.add(Rights.DEVELOPER, "clanify", "Toggles the ability to clanify objects and npcs by examining them.", (p, args) -> {
+			p.getNSV().setB("clanifyStuff", !p.getNSV().getB("clanifyStuff"));
+			p.sendMessage("CLANIFY: " + p.getNSV().getB("clanifyStuff"));
+		});
+		
 		Commands.add(Rights.DEVELOPER, "allstopfaceme", "Stops all body model rotators.", (p, args) -> {
 			for (Player player : World.getPlayers()) {
 				if (player == null || !player.hasStarted() || player.hasFinished())
@@ -140,7 +145,7 @@ public class MiscTest {
 		});
 		
 		Commands.add(Rights.DEVELOPER, "spawnmax", "Spawns another max into the world on top of the player.", (p, args) -> {
-			World.spawnNPC(3373, new WorldTile(p.getTile()), -1, true, true, true);
+			World.spawnNPC(3373, WorldTile.of(p.getTile()), -1, true, true, true);
 		});
 		
 		Commands.add(Rights.DEVELOPER, "playcs", "Plays a cutscene using new cutscene system", (p, args) -> {
@@ -155,8 +160,8 @@ public class MiscTest {
 		Commands.add(Rights.DEVELOPER, "tilefree", "Checks if tile is free", (p, args) -> {
 			for (int x = -10;x < 10;x++)
 				for (int y = -10;y < 10;y++)
-					if (World.floorAndWallsFree(new WorldTile(p.getX() + x, p.getY() + y, p.getPlane()), 1))
-						World.sendSpotAnim(p, new SpotAnim(2000, 0, 96), new WorldTile(p.getX() + x, p.getY() + y, p.getPlane()));
+					if (World.floorAndWallsFree(WorldTile.of(p.getX() + x, p.getY() + y, p.getPlane()), 1))
+						World.sendSpotAnim(p, new SpotAnim(2000, 0, 96), WorldTile.of(p.getX() + x, p.getY() + y, p.getPlane()));
 		});
 		
 		Commands.add(Rights.DEVELOPER, "tutisland", "Start tutorial island", (p, args) -> {
@@ -259,18 +264,18 @@ public class MiscTest {
 		});
 
 		Commands.add(Rights.DEVELOPER, "runespan", "Teleports to runespan.", (p, args) -> {
-			p.setNextWorldTile(new WorldTile(3995, 6103, 1));
+			p.setNextWorldTile(WorldTile.of(3995, 6103, 1));
 			p.getControllerManager().startController(new RunespanController());
 		});
 
 		Commands.add(Rights.DEVELOPER, "proj [id]", "Sends a projectile over the player.", (p, args) -> {
 			p.getTempAttribs().setI("tempProjCheck", Integer.valueOf(args[0]));
-			World.sendProjectile(new WorldTile(p.getX() + 5, p.getY(), p.getPlane()), new WorldTile(p.getX() - 5, p.getY(), p.getPlane()), Integer.valueOf(args[0]), 40, 40, 0, 0.2, 0, 0);
+			World.sendProjectile(WorldTile.of(p.getX() + 5, p.getY(), p.getPlane()), WorldTile.of(p.getX() - 5, p.getY(), p.getPlane()), Integer.valueOf(args[0]), 40, 40, 0, 0.2, 0, 0);
 		});
 
 		Commands.add(Rights.DEVELOPER, "projrot [id next/prev]", "Sends a projectile over the player.", (p, args) -> {
 			int projId = p.getTempAttribs().getI("tempProjCheck", 0);
-			World.sendProjectile(new WorldTile(p.getX() + 5, p.getY(), p.getPlane()), new WorldTile(p.getX() - 5, p.getY(), p.getPlane()), projId, 0, 0, 0, 0.2, 0, 0);
+			World.sendProjectile(WorldTile.of(p.getX() + 5, p.getY(), p.getPlane()), WorldTile.of(p.getX() - 5, p.getY(), p.getPlane()), projId, 0, 0, 0, 0.2, 0, 0);
 			p.getPackets().sendDevConsoleMessage("Projectile: " + projId);
 			if (args[0].equals("next"))
 				p.getTempAttribs().setI("tempProjCheck", Utils.clampI(projId+1, 0, 5000));
@@ -360,7 +365,7 @@ public class MiscTest {
 		});
 
 		Commands.add(Rights.DEVELOPER, "spawntestnpc", "Spawns an invincible combat test NPC.", (p, args) -> {
-			NPC n = World.spawnNPC(14256, new WorldTile(p.getTile()), -1, true, true);
+			NPC n = World.spawnNPC(14256, WorldTile.of(p.getTile()), -1, true, true);
 			n.setHitpoints(Integer.MAX_VALUE / 2);
 			n.getCombatDefinitions().setHitpoints(Integer.MAX_VALUE / 2);
 		});
@@ -433,8 +438,8 @@ public class MiscTest {
 			p.getAppearance().generateAppearanceData();
 		});
 
-		Commands.add(Settings.getConfig().isDebug() ? Rights.PLAYER : Rights.DEVELOPER, "sound [id effectType]", "Plays a sound effect.", (p, args) -> {
-			p.getPackets().sendSound(Integer.valueOf(args[0]), 0, args.length > 1 ? Integer.valueOf(args[1]) : 1);
+		Commands.add(Settings.getConfig().isDebug() ? Rights.PLAYER : Rights.DEVELOPER, "sound [id]", "Plays a sound effect.", (p, args) -> {
+			p.soundEffect(Integer.valueOf(args[0]));
 		});
 
 		Commands.add(Settings.getConfig().isDebug() ? Rights.PLAYER : Rights.DEVELOPER, "music [id (volume)]", "Plays a music track.", (p, args) -> {
@@ -476,19 +481,19 @@ public class MiscTest {
 		Commands.add(Rights.DEVELOPER, "frogland", "Plays frogland to everyone on the server.", (p, args) -> {
 			World.allPlayers(target -> {
 				target.getPackets().sendRunScript(1764, 12451857, 12451853, 20, 0); //0 music volume, 1 sound effect volume, 2 ambient sound volume
-				target.getPackets().sendMusic(409, 100, 255);
+				target.musicTrack(409);
 			});
 		});
 
 		Commands.add(Rights.DEVELOPER, "musicall [id]", "Plays music to everyone on the server.", (p, args) -> {
 			World.allPlayers(target -> {
 				target.getPackets().sendRunScript(1764, 12451857, 12451853, 20, 0); //0 music volume, 1 sound effect volume, 2 ambient sound volume
-				target.getPackets().sendMusic(Integer.valueOf(args[0]), 100, 255);
+				target.musicTrack(Integer.valueOf(args[0]));
 			});
 		});
 
-		Commands.add(Rights.DEVELOPER, "musiceffect [id]", "plays music effects", (p, args) -> {
-			p.getPackets().sendMusicEffect(Integer.valueOf(args[0]));
+		Commands.add(Rights.DEVELOPER, "jingle [id]", "plays jingles", (p, args) -> {
+			p.jingle(Integer.valueOf(args[0]));
 		});
 
 		Commands.add(Rights.DEVELOPER, "tileflags", "Get the tile flags for the tile you're standing on.", (p, args) -> {
@@ -504,24 +509,24 @@ public class MiscTest {
 		});
 
 		Commands.add(Rights.DEVELOPER, "npc [npcId]", "Spawns an NPC with specified ID.", (p, args) -> {
-			World.spawnNPC(Integer.parseInt(args[0]), new WorldTile(p.getTile()), -1, true, true, false);
+			World.spawnNPC(Integer.parseInt(args[0]), WorldTile.of(p.getTile()), -1, true, true, false);
 		});
 
 		Commands.add(Rights.DEVELOPER, "addnpc [npcId]", "Spawns an NPC permanently with specified ID.", (p, args) -> {
 			if (!Settings.getConfig().isDebug())
 				return;
-			if (NPCSpawns.addSpawn(p.getUsername(), Integer.valueOf(args[0]), new WorldTile(p.getTile())))
+			if (NPCSpawns.addSpawn(p.getUsername(), Integer.valueOf(args[0]), WorldTile.of(p.getTile())))
 				p.sendMessage("Added spawn.");
 		});
 
 		Commands.add(Rights.DEVELOPER, "dropitem", "Spawns an item on the floor until it is picked up.", (p, args) -> {
-			World.addGroundItem(new Item(Integer.valueOf(args[0]), 1), new WorldTile(p.getX(), p.getY(), p.getPlane()));
+			World.addGroundItem(new Item(Integer.valueOf(args[0]), 1), WorldTile.of(p.getX(), p.getY(), p.getPlane()));
 		});
 
 		Commands.add(Rights.DEVELOPER, "addgrounditem,addgitem [itemId]", "Spawns a ground item permanently with specified ID.", (p, args) -> {
 			if (!Settings.getConfig().isDebug())
 				return;
-			if (ItemSpawns.addSpawn(p.getUsername(), Integer.valueOf(args[0]), 1, new WorldTile(p.getTile())))
+			if (ItemSpawns.addSpawn(p.getUsername(), Integer.valueOf(args[0]), 1, WorldTile.of(p.getTile())))
 				p.sendMessage("Added spawn.");
 		});
 
@@ -715,7 +720,7 @@ public class MiscTest {
 			int steps = RouteFinder.findRoute(RouteFinder.WALK_ROUTEFINDER, p.getX(), p.getY(), p.getPlane(), 1, new FixedTileStrategy(x, y), true);
 			int[] bufferX = RouteFinder.getLastPathBufferX();
 			int[] bufferY = RouteFinder.getLastPathBufferY();
-			p.getSession().writeToQueue(new HintTrail(new WorldTile(p.getTile()), modelId, bufferX, bufferY, steps));
+			p.getSession().writeToQueue(new HintTrail(WorldTile.of(p.getTile()), modelId, bufferX, bufferY, steps));
 		});
 
 		Commands.add(Rights.ADMIN, "maxhit", "Displays the player's max hit.", (p, args) -> {
@@ -732,10 +737,10 @@ public class MiscTest {
 			for (GameObject obj : objs)
 				p.getPackets().sendDevConsoleMessage(i++ + ": " + obj.toString());
 			if(args.length == 1) {
-				p.setNextWorldTile(objs.get(0));
+				p.setNextWorldTile(objs.get(0).getTile());
 				return;
 			}
-			p.setNextWorldTile(objs.get(Integer.valueOf(args[1])));
+			p.setNextWorldTile(objs.get(Integer.valueOf(args[1])).getTile());
 		});
 
 		Commands.add(Rights.DEVELOPER, "searchnpc,sn [npcId index]", "Searches the entire gameworld for an NPC matching the ID and teleports you to it.", (p, args) -> {
@@ -748,7 +753,7 @@ public class MiscTest {
 			for(NPC npc : npcs)
 				p.getPackets().sendDevConsoleMessage(i++ + ": " + npc.toString());
 			if (args.length == 1) {
-				p.setNextWorldTile(new WorldTile(npcs.get(0).getTile()));
+				p.setNextWorldTile(WorldTile.of(npcs.get(0).getTile()));
 				return;
 			}
 			p.setNextWorldTile(npcs.get(Integer.valueOf(args[1])).getTile());
@@ -788,9 +793,7 @@ public class MiscTest {
 			p.getSkills().init();
 		});
 
-		Commands.add(Rights.PLAYER, "voice, v [id]", "Plays voices.", (p, args) -> {
-			p.playSound(Integer.valueOf(args[0]), 2);
-		});
+		Commands.add(Rights.PLAYER, "voice, v [id]", "Plays voices.", (p, args) -> p.voiceEffect(Integer.valueOf(args[0])));
 
 		Commands.add(Rights.PLAYER, "playthroughvoices [start finish tick_delay]", "Gets player rights", (p, args) -> {
 			//		Voice[] voices = new Voice[3];
@@ -822,7 +825,7 @@ public class MiscTest {
 
 					if(!Voices.voicesMarked.contains(voiceID)) {
 						p.sendMessage("Playing voice " + voiceID);
-						p.getPackets().sendVoice(voiceID++);
+						p.voiceEffect(voiceID++);
 					}
 
 					if(voiceID > Integer.valueOf(args[1]))
@@ -839,13 +842,13 @@ public class MiscTest {
 				int x = Integer.valueOf(args[1]) << 6 | Integer.valueOf(args[3]);
 				int y = Integer.valueOf(args[2]) << 6 | Integer.valueOf(args[4]);
 				p.resetWalkSteps();
-				p.setNextWorldTile(new WorldTile(x, y, plane));
+				p.setNextWorldTile(WorldTile.of(x, y, plane));
 			} else if (args.length == 1) {
 				p.resetWalkSteps();
-				p.setNextWorldTile(new WorldTile(Integer.valueOf(args[0])));
+				p.setNextWorldTile(WorldTile.of(Integer.valueOf(args[0])));
 			} else {
 				p.resetWalkSteps();
-				p.setNextWorldTile(new WorldTile(Integer.valueOf(args[0]), Integer.valueOf(args[1]), args.length >= 3 ? Integer.valueOf(args[2]) : p.getPlane()));
+				p.setNextWorldTile(WorldTile.of(Integer.valueOf(args[0]), Integer.valueOf(args[1]), args.length >= 3 ? Integer.valueOf(args[2]) : p.getPlane()));
 			}
 		});
 
@@ -853,14 +856,14 @@ public class MiscTest {
 			int regionX = (Integer.valueOf(args[0]) >> 8) * 64 + 32;
 			int regionY = (Integer.valueOf(args[0]) & 0xff) * 64 + 32;
 			p.resetWalkSteps();
-			p.setNextWorldTile(new WorldTile(regionX, regionY, 0));
+			p.setNextWorldTile(WorldTile.of(regionX, regionY, 0));
 		});
 
 		Commands.add(Rights.ADMIN, "telec,tpc [chunkX chunkY]", "Teleports the player to chunk coordinates.", (p, args) -> {
 			int chunkX = Integer.valueOf(args[0]) * 8 + 4;
 			int chunkY = Integer.valueOf(args[1]) * 8 + 4;
 			p.resetWalkSteps();
-			p.setNextWorldTile(new WorldTile(chunkX, chunkY, 0));
+			p.setNextWorldTile(WorldTile.of(chunkX, chunkY, 0));
 		});
 
 		Commands.add(Rights.ADMIN, "settitle [new title]", "Sets player title.", (p, args) -> {
@@ -1063,7 +1066,7 @@ public class MiscTest {
 		});
 
 		Commands.add(Rights.DEVELOPER, "objectanim,oanim [x y (objectType)]", "Makes an object play an animation.", (p, args) -> {
-			GameObject object = args.length == 3 ? World.getObject(new WorldTile(Integer.parseInt(args[0]), Integer.parseInt(args[1]), p.getPlane())) : World.getObject(new WorldTile(Integer.parseInt(args[0]), Integer.parseInt(args[1]), p.getPlane()), ObjectType.forId(Integer.parseInt(args[2])));
+			GameObject object = args.length == 3 ? World.getObject(WorldTile.of(Integer.parseInt(args[0]), Integer.parseInt(args[1]), p.getPlane())) : World.getObject(WorldTile.of(Integer.parseInt(args[0]), Integer.parseInt(args[1]), p.getPlane()), ObjectType.forId(Integer.parseInt(args[2])));
 			if (object == null) {
 				p.getPackets().sendDevConsoleMessage("No object was found.");
 				return;
@@ -1074,7 +1077,7 @@ public class MiscTest {
 		Commands.add(Rights.DEVELOPER, "objectanimloop,oanimloop [x y (startId) (endId)]", "Loops through object animations.", (p, args) -> {
 			int x = Integer.parseInt(args[0]);
 			int y = Integer.parseInt(args[1]);
-			GameObject o = World.getRegion(p.getRegionId()).getSpawnedObject(new WorldTile(x, y, p.getPlane()));
+			GameObject o = World.getRegion(p.getRegionId()).getSpawnedObject(WorldTile.of(x, y, p.getPlane()));
 			if (o == null) {
 				p.getPackets().sendDevConsoleMessage("Could not find object at [x=" + x + ", y=" + y + ", z=" + p.getPlane() + "].");
 				return;

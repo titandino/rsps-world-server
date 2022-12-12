@@ -116,6 +116,7 @@ public abstract class Entity {
 	private transient ActionManager actionManager;
 	private transient InteractionManager interactionManager;
 	private transient ClipType clipType = ClipType.NORMAL;
+	private transient long lockDelay; // used for doors and stuff like that
 
 	private transient BodyGlow nextBodyGlow;
 	private transient ConcurrentLinkedQueue<Hit> receivedHits;
@@ -123,6 +124,7 @@ public abstract class Entity {
 	private transient boolean finished;
 	private transient long tickCounter = 0;
 	// entity masks
+	private transient int bas = -1;
 	private transient Animation nextAnimation;
 	private transient SpotAnim nextSpotAnim1;
 	private transient SpotAnim nextSpotAnim2;
@@ -146,7 +148,7 @@ public abstract class Entity {
 
 	// saving stuff
 	private int hitpoints;
-	private final WorldTile tile;
+	private WorldTile tile;
 	private RegionSize regionSize;
 
 	private boolean run;
@@ -155,7 +157,7 @@ public abstract class Entity {
 
 	// creates Entity and saved classes
 	public Entity(WorldTile tile) {
-		this.tile = new WorldTile(tile);
+		this.tile = WorldTile.of(tile);
 		this.uuid = UUID.randomUUID().toString();
 		poison = new Poison();
 	}
@@ -246,16 +248,16 @@ public abstract class Entity {
 	}
 	
 	public WorldTile getTileInScene(int x, int y) {
-		WorldTile tile = new WorldTile(x, y, getPlane());
-		return new WorldTile(tile.getXInScene(getSceneBaseChunkId()), tile.getYInScene(getSceneBaseChunkId()), getPlane());
+		WorldTile tile = WorldTile.of(x, y, getPlane());
+		return WorldTile.of(tile.getXInScene(getSceneBaseChunkId()), tile.getYInScene(getSceneBaseChunkId()), getPlane());
 	}
 	
 	public int getSceneX(int targetX) {
-		return new WorldTile(targetX, 0, 0).getXInScene(getSceneBaseChunkId());
+		return WorldTile.of(targetX, 0, 0).getXInScene(getSceneBaseChunkId());
 	}
 	
 	public int getSceneY(int targetY) {
-		return new WorldTile(0, targetY, 0).getYInScene(getSceneBaseChunkId());
+		return WorldTile.of(0, targetY, 0).getYInScene(getSceneBaseChunkId());
 	}
 
 	public final void initEntity() {
@@ -272,6 +274,7 @@ public abstract class Entity {
 		nextWalkDirection = nextRunDirection = null;
 		lastFaceEntity = -1;
 		nextFaceEntity = -2;
+		bas = -1;
 		if (!(this instanceof NPC))
 			faceAngle = 2;
 		poison.setEntity(this);
@@ -345,6 +348,8 @@ public abstract class Entity {
 	}
 
 	public void processReceivedHits() {
+		if (lockDelay > World.getServerTicks())
+			return;
 		if (this instanceof Player p)
 			if (p.getEmotesManager().isAnimating())
 				return;
@@ -426,6 +431,7 @@ public abstract class Entity {
 					hit.getSource().applyHit(new Hit(player, (int) (hit.getDamage() * 0.1), HitLook.REFLECTED_DAMAGE));
 			if (player.getPrayer().hasPrayersOn())
 				if ((hitpoints < player.getMaxHitpoints() * 0.1) && player.getPrayer().active(Prayer.REDEMPTION)) {
+					player.soundEffect(2681);
 					setNextSpotAnim(new SpotAnim(436));
 					setHitpoints((int) (hitpoints + player.getSkills().getLevelForXp(Constants.PRAYER) * 2.5));
 					player.getPrayer().setPoints(0);
@@ -592,7 +598,7 @@ public abstract class Entity {
 		NPC npc = this instanceof NPC ? (NPC) this : null;
 		Player player = this instanceof Player ? (Player) this : null;
 
-		lastWorldTile = new WorldTile(getTile());
+		lastWorldTile = WorldTile.of(getTile());
 		if (lastFaceEntity >= 0) {
 			Entity target = lastFaceEntity >= 32768 ? World.getPlayers().get(lastFaceEntity - 32768) : World.getNPCs().get(lastFaceEntity);
 			if (target != null) {
@@ -602,7 +608,7 @@ public abstract class Entity {
 		}
 		nextWalkDirection = nextRunDirection = null;
 		if (nextWorldTile != null) {
-			getTile().setLocation(nextWorldTile);
+			tile = nextWorldTile;
 			tileBehind = getBackfacingTile();
 			nextWorldTile = null;
 			teleported = true;
@@ -613,7 +619,7 @@ public abstract class Entity {
 				loadMapRegions();
 			if (player != null) {
 				if (World.getRegion(getRegionId(), true) instanceof DynamicRegion)
-					player.setLastNonDynamicTile(new WorldTile(lastWorldTile));
+					player.setLastNonDynamicTile(WorldTile.of(lastWorldTile));
 				else
 					player.clearLastNonDynamicTile();
 			}
@@ -643,7 +649,7 @@ public abstract class Entity {
 			if (nextStep == null)
 				break;
 			if (player != null)
-				PluginManager.handle(new PlayerStepEvent(player, nextStep, new WorldTile(getX() + nextStep.getDir().getDx(), getY() + nextStep.getDir().getDy(), getPlane())));
+				PluginManager.handle(new PlayerStepEvent(player, nextStep, WorldTile.of(getX() + nextStep.getDir().getDx(), getY() + nextStep.getDir().getDy(), getPlane())));
 			if ((nextStep.checkClip() && !World.checkWalkStep(getPlane(), getX(), getY(), nextStep.getDir(), getSize(), getClipType())) || (nextStep.checkClip() && npc != null && !npc.checkNPCCollision(nextStep.getDir())) || !canMove(nextStep.getDir())) {
 				resetWalkSteps();
 				break;
@@ -652,7 +658,7 @@ public abstract class Entity {
 				nextWalkDirection = nextStep.getDir();
 			else
 				nextRunDirection = nextStep.getDir();
-			tileBehind = new WorldTile(getTile());
+			tileBehind = WorldTile.of(getTile());
 			moveLocation(nextStep.getDir().getDx(), nextStep.getDir().getDy(), 0);
 			if (run && stepCount == 0) { // fixes impossible steps TODO is this even necessary?
 				WalkStep previewStep = previewNextWalkStep();
@@ -683,7 +689,7 @@ public abstract class Entity {
 	}
 
 	public void moveLocation(int xOffset, int yOffset, int planeOffset) {
-		getTile().moveLocation(xOffset, yOffset, planeOffset);
+		tile = tile.transform(xOffset, yOffset, planeOffset);
 		faceAngle = Utils.getAngleTo(xOffset, yOffset);
 	}
 
@@ -708,7 +714,7 @@ public abstract class Entity {
 
 	public WorldTile getMiddleWorldTile() {
 		int size = getSize();
-		return size == 1 ? getTile() : new WorldTile(getCoordFaceX(size), getCoordFaceY(size), getPlane());
+		return size == 1 ? getTile() : WorldTile.of(getCoordFaceX(size), getCoordFaceY(size), getPlane());
 	}
 
 	public boolean ignoreWallsWhenMeleeing() {
@@ -749,6 +755,7 @@ public abstract class Entity {
 			case "Rocktail shoal":
 			case "Musician":
 			case "Ghostly piper":
+			case "Clan vexillum":
 				return true;
 			}
 		}
@@ -1036,7 +1043,7 @@ public abstract class Entity {
 	}
 
 	public void setNextWorldTile(WorldTile nextWorldTile) {
-		this.nextWorldTile = new WorldTile(nextWorldTile);
+		this.nextWorldTile = WorldTile.of(nextWorldTile);
 	}
 
 	public WorldTile getNextWorldTile() {
@@ -1084,19 +1091,19 @@ public abstract class Entity {
 	}
 
 	public void faceNorth() {
-		setNextFaceWorldTile(new WorldTile(getX(), getY()+1, getPlane()));
+		setNextFaceWorldTile(WorldTile.of(getX(), getY()+1, getPlane()));
 	}
 
 	public void faceEast() {
-		setNextFaceWorldTile(new WorldTile(getX()+1, getY(), getPlane()));
+		setNextFaceWorldTile(WorldTile.of(getX()+1, getY(), getPlane()));
 	}
 
 	public void faceSouth() {
-		setNextFaceWorldTile(new WorldTile(getX(), getY()-1, getPlane()));
+		setNextFaceWorldTile(WorldTile.of(getX(), getY()-1, getPlane()));
 	}
 
 	public void faceWest() {
-		setNextFaceWorldTile(new WorldTile(getX()-1, getY(), getPlane()));
+		setNextFaceWorldTile(WorldTile.of(getX()-1, getY(), getPlane()));
 	}
 
 	public abstract int getSize();
@@ -1122,6 +1129,14 @@ public abstract class Entity {
 
 	public int getLastFaceEntity() {
 		return lastFaceEntity;
+	}
+	
+	public void unfreeze() {
+		removeEffect(Effect.FREEZE);
+	}
+	
+	public void freeze() {
+		freeze(Integer.MAX_VALUE, false);
 	}
 
 	public void freeze(int ticks) {
@@ -1224,7 +1239,7 @@ public abstract class Entity {
 	}
 
 	public void faceEntity(Entity target) {
-		setNextFaceWorldTile(new WorldTile(target.getCoordFaceX(target.getSize()), target.getCoordFaceY(target.getSize()), target.getPlane()));
+		setNextFaceWorldTile(WorldTile.of(target.getCoordFaceX(target.getSize()), target.getCoordFaceY(target.getSize()), target.getPlane()));
 	}
 
 	public void faceObject(GameObject object) {
@@ -1290,7 +1305,7 @@ public abstract class Entity {
 			x = object.getCoordFaceX();
 			y = object.getCoordFaceY();
 		}
-		setNextFaceWorldTile(new WorldTile(x, y, object.getPlane()));
+		setNextFaceWorldTile(WorldTile.of(x, y, object.getPlane()));
 	}
 
 	public void faceTile(WorldTile tile) {
@@ -1429,15 +1444,15 @@ public abstract class Entity {
 	}
 
 	public void setTile(WorldTile tile) {
-		this.tile.setLocation(tile);
+		this.tile = tile;
 	}
 
 	public void setLocation(WorldTile tile) {
-		tile.setLocation(tile);
+		this.tile = tile;
 	}
 
 	public void setLocation(int x, int y, int z) {
-		tile.setLocation(x, y, z);
+		this.tile = WorldTile.of(x, y, z);
 	}
 
 	public boolean isAt(int x, int y) {
@@ -1581,6 +1596,8 @@ public abstract class Entity {
 	}
 
 	public boolean canAttackMulti(Entity target) {
+		if(target instanceof Familiar && this.isForceMultiArea())
+			return true;
 		if (target instanceof NPC npc && npc.isForceMultiAttacked())
 			return true;
 		if (target.isAtMultiArea() && isAtMultiArea())
@@ -1755,5 +1772,42 @@ public abstract class Entity {
 			return;
 		}
 		this.bodyModelRotator = bodyModelRotator;
+	}
+
+	public int getBas() {
+		return bas;
+	}
+
+	public void setBas(int basAnim) {
+		if (basAnim == -1) {
+			setBasNoReset(-2);
+			return;
+		}
+		setBasNoReset(basAnim);
+	}
+	
+	public void setBasNoReset(int bas) {
+		this.bas = bas;
+	}
+	
+	public boolean isLocked() {
+		return lockDelay >= World.getServerTicks();
+	}
+
+	/**
+	 * You are invincible & cannot use your character until unlocked.
+	 * All hits are processed after unlocking.
+	 * If you use resetRecievedHits you lose those hits.
+	 */
+	public void lock() {
+		lockDelay = Long.MAX_VALUE;
+	}
+
+	public void lock(int ticks) {
+		lockDelay = World.getServerTicks() + ticks;
+	}
+
+	public void unlock() {
+		lockDelay = 0;
 	}
 }

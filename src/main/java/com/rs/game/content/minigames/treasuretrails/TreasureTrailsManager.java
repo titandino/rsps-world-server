@@ -311,8 +311,8 @@ public class TreasureTrailsManager {
 			return;
 		if (!hasCurrentClue())
 			return;
-		else if (!player.withinDistance(new WorldTile(currentClue.details.getId()), 8)) {
-			player.sendMessage("Hint: " + new WorldTile(currentClue.details.getId()).toString());
+		else if (!player.withinDistance(WorldTile.of(currentClue.details.getId()), 8)) {
+			player.sendMessage("Hint: " + WorldTile.of(currentClue.details.getId()).toString());
 			return;
 		} else if (emote != ((Emote[]) currentClue.details.parameters[0])[cluePhase == 3 ? 1 : 0])
 			return;
@@ -338,7 +338,7 @@ public class TreasureTrailsManager {
 		if ((currentClue.details.type == SIMPLE || currentClue.details.type == MAP) && currentClue.details.idType == TILE) {
 			if (!hasCurrentClue())
 				return false;
-			WorldTile tile = new WorldTile(currentClue.details.getId());
+			WorldTile tile = WorldTile.of(currentClue.details.getId());
 			if (!player.withinDistance(tile, currentClue.details.type == MAP ? meerkat ? 12 : 6 : meerkat ? 32 : 16))
 				return false;
 			setNextClue(SOURCE_DIG, meerkat);
@@ -491,7 +491,7 @@ public class TreasureTrailsManager {
 		player.getInterfaceManager().sendInterface(364);
 		player.getPackets().sendInterSetItemsOptionsScript(364, 4, 141, 3, 4, "Examine");
 		final Item[] rewards = generateRewards(player, level);
-		player.getPackets().sendMusicEffect(193);
+		player.jingle(193);
 		player.getPackets().setIFRightClickOps(364, 4, 0, rewards.length, 0);
 		player.incrementCount(LEVEL[level] + " clues completed");
 		boolean banked = false;
@@ -540,7 +540,7 @@ public class TreasureTrailsManager {
 	public static WorldTile getTile(int degreeY, int minY, int dirY, int degreeX, int minX, int dirX) {
 		double offsetY = degreeY * 60 / 1.875 + minY / 1.875;
 		double offsetX = degreeX * 60 / 1.875 + minX / 1.875;
-		return new WorldTile(2440 + (dirX == EAST ? (int) offsetX : (int) -offsetX), 3162 + (dirY == NORTH ? (int) offsetY : (int) -offsetY), 0);
+		return WorldTile.of(2440 + (dirX == EAST ? (int) offsetX : (int) -offsetX), 3162 + (dirY == NORTH ? (int) offsetY : (int) -offsetY), 0);
 	}
 
 	private int[] getCoordinates(WorldTile tile) {

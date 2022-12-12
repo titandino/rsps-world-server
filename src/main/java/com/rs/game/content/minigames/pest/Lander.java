@@ -33,7 +33,7 @@ public class Lander {
 
 	public static Lander[] landers = new Lander[3];
 	private static final int AUTO_GAME = Settings.getConfig().isDebug() ? 2 : 15;
-	private static final int TIME = 150;
+	private static final int TIME = 30;
 
 	private List<Player> lobby = Collections.synchronizedList(new LinkedList<Player>());
 	private LobbyTimer timer;
@@ -119,11 +119,11 @@ public class Lander {
 
 	public static enum LanderRequirement {
 
-		NOVICE(0, 40, new WorldTile(2661, 2639, 0), new WorldTile(2657, 2639, 0)),
+		NOVICE(0, 40, WorldTile.of(2661, 2639, 0), WorldTile.of(2657, 2639, 0)),
 
-		INTERMEDIATE(1, 70, new WorldTile(2641, 2644, 0), new WorldTile(2644, 2644, 0)),
+		INTERMEDIATE(1, 70, WorldTile.of(2641, 2644, 0), WorldTile.of(2644, 2644, 0)),
 
-		VETERAN(2, 100, new WorldTile(2635, 2653, 0), new WorldTile(2638, 2653, 0));
+		VETERAN(2, 100, WorldTile.of(2635, 2653, 0), WorldTile.of(2638, 2653, 0));
 
 		private static Map<Integer, LanderRequirement> landers = new HashMap<>();
 

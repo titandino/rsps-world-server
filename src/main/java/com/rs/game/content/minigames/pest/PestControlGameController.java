@@ -71,7 +71,7 @@ public class PestControlGameController extends Controller {
 					control.getPlayers().remove(player);
 			player.useStairs(-1, Lander.getLanders()[control.getPestData().ordinal()].getLanderRequierment().getExitTile(), 1, 2);
 		} else
-			player.useStairs(-1, new WorldTile(2657, 2639, 0), 1, 2);
+			player.useStairs(-1, WorldTile.of(2657, 2639, 0), 1, 2);
 		player.setForceMultiArea(false);
 		player.getInterfaceManager().removeOverlay();
 		player.reset();
@@ -96,7 +96,7 @@ public class PestControlGameController extends Controller {
 
 	@Override
 	public boolean canMove(Direction dir) {
-		WorldTile toTile = new WorldTile(player.getX() + dir.getDx(), player.getY() + dir.getDy(), player.getPlane());
+		WorldTile toTile = WorldTile.of(player.getX() + dir.getDx(), player.getY() + dir.getDy(), player.getPlane());
 		return !control.isBrawlerAt(toTile);
 	}
 
@@ -134,7 +134,7 @@ public class PestControlGameController extends Controller {
 					player.setNextWorldTile(control.getWorldTile(35 - Utils.random(4), 54 - (Utils.random(3))));
 					player.setNextAnimation(new Animation(-1));
 				} else if (loop == 4) {
-					player.getPackets().sendMusicEffect(90);
+					player.jingle(90);
 					stop();
 				}
 				loop++;

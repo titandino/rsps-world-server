@@ -785,7 +785,7 @@ public final class Skills {
 		else
 			player.getVars().setVar(2044, 0);
 		player.getVars().syncVarsToClient();
-		player.getPackets().updateStats(player, markedForUpdate.stream().mapToInt(e -> e.intValue()).toArray());
+		player.getPackets().updateStats(markedForUpdate.stream().mapToInt(e -> e.intValue()).toArray());
 		if (markedForLevelUp != -1)
 			sendLevelUp(markedForLevelUp);
 		markedForUpdate.clear();
@@ -804,7 +804,7 @@ public final class Skills {
 		switchFlash(player, skill, true);
 		int musicEffect = SKILL_LEVEL_UP_MUSIC_EFFECTS[skill];
 		if (musicEffect != -1)
-			player.getPackets().sendMusicEffect(musicEffect);
+			player.jingle(musicEffect);
 		if (!player.hasRights(Rights.ADMIN) && (level == 99 || level == 120))
 			checkMaxedNotification(player, skill, level);
 	}
@@ -974,7 +974,7 @@ public final class Skills {
 			player.setNextSpotAnim(new SpotAnim(2457, 25, 254));
 			player.setNextSpotAnim(new SpotAnim(2456, 50, 220));
 			if (newLevel == 99 || newLevel == 120)
-				World.sendSpotAnim(player, new SpotAnim(1765), new WorldTile(player.getTile()));
+				World.sendSpotAnim(player, new SpotAnim(1765), WorldTile.of(player.getTile()));
 			if (skill == Constants.SUMMONING || (skill >= Constants.ATTACK && skill <= Constants.MAGIC)) {
 				player.getAppearance().generateAppearanceData();
 				if (skill == Constants.HITPOINTS)

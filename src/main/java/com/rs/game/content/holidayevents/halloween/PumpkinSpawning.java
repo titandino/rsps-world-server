@@ -23,8 +23,6 @@ import com.rs.game.World;
 import com.rs.game.content.holidayevents.halloween.hw07.Halloween2007;
 import com.rs.game.content.holidayevents.halloween.hw09.Halloween2009;
 import com.rs.game.region.Region;
-import com.rs.game.tasks.WorldTask;
-import com.rs.game.tasks.WorldTasks;
 import com.rs.lib.game.GroundItem;
 import com.rs.lib.game.Item;
 import com.rs.lib.game.WorldTile;
@@ -45,13 +43,8 @@ public class PumpkinSpawning {
 	public static void initSpawning() {
 		if (!Halloween2007.ENABLED && !Halloween2009.ENABLED)
 			return;
-		WorldTasks.schedule(new WorldTask() {
-			@Override
-			public void run() {
-				for (int id : regionsToSpawn)
-					World.getRegion(id, true);
-			}
-		}, 10);
+		for (int id : regionsToSpawn)
+			World.getRegion(id, true);
 		CoresManager.schedule(() -> {
 			try {
 				spawnPumpkins();
@@ -80,13 +73,13 @@ public class PumpkinSpawning {
 			for (int i = 0; i < eggsNeeded; i++) {
 				int x = r.getBaseX()+Utils.random(64);
 				int y = r.getBaseY()+Utils.random(64);
-				WorldTile tile = new WorldTile(x, y, 0);
+				WorldTile tile = WorldTile.of(x, y, 0);
 				while (!World.floorAndWallsFree(tile, 1)) {
 					x = r.getBaseX()+Utils.random(64);
 					y = r.getBaseY()+Utils.random(64);
-					tile = new WorldTile(x, y, 0);
+					tile = WorldTile.of(x, y, 0);
 				}
-				World.addGroundItem(new Item(1959), new WorldTile(x, y, 0));
+				World.addGroundItem(new Item(1959), WorldTile.of(x, y, 0));
 			}
 		}
 	}

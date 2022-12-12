@@ -126,7 +126,7 @@ public class PiratesTreasure extends QuestOutline {
 	public static void findTreasure(Player p) {
 		if((p.getQuestManager().getStage(Quest.PIRATES_TREASURE) != GET_TREASURE) || !p.getQuestManager().getAttribs(Quest.PIRATES_TREASURE).getB(PiratesTreasure.KNOWS_TREASURE_LOC_ATTR))
 			return;
-		if(Utils.getDistance(p.getTile(), new WorldTile(2999, 3383, 0)) <= 2) {
+		if(Utils.getDistance(p.getTile(), WorldTile.of(2999, 3383, 0)) <= 2) {
 			if(p.getQuestManager().getAttribs(Quest.PIRATES_TREASURE).getB(KILLED_GARDENER_ATTR)) {
 				p.getQuestManager().completeQuest(Quest.PIRATES_TREASURE);
 				return;
@@ -134,7 +134,7 @@ public class PiratesTreasure extends QuestOutline {
 			for(NPC npc : World.getNPCsInRegion(p.getRegionId()))
 				if(npc.getId()== HOSTILE_GARDENER)
 					return;
-			NPC gardener = World.spawnNPC(HOSTILE_GARDENER, new WorldTile(p.getTile()), -1, false, true);
+			NPC gardener = World.spawnNPC(HOSTILE_GARDENER, WorldTile.of(p.getTile()), -1, false, true);
 			gardener.setTarget(p);
 			gardener.forceTalk("First moles, now this!? Take this, vandal!");
 		}
@@ -145,7 +145,7 @@ public class PiratesTreasure extends QuestOutline {
 		public void handle(EnterChunkEvent e) {
 			if (e.getEntity() instanceof Player p && p.getQuestManager().getStage(Quest.PIRATES_TREASURE) == SMUGGLE_RUM)
 				if (!p.getQuestManager().getAttribs(Quest.PIRATES_TREASURE).getB(HAS_SMUGGLED_RUM_ATTR) && p.getInventory().containsItem(RUM))
-					if (Utils.getDistance(p.getTile(), new WorldTile(2928, 3143, 0)) > 70) {
+					if (Utils.getDistance(p.getTile(), WorldTile.of(2928, 3143, 0)) > 70) {
 						while (p.getInventory().containsItem(RUM, 1))
 							p.getInventory().removeItems(new Item(RUM, 1));
 						p.sendMessage("Your Karamja rum gets broken and spilled.");
@@ -154,36 +154,23 @@ public class PiratesTreasure extends QuestOutline {
 	};
 
 
-	public static ItemClickHandler openCasket = new ItemClickHandler(CASKET) {
+	public static ItemClickHandler openCasket = new ItemClickHandler(new Object[] { CASKET }, new String[] { "Open" }) {
 		@Override
 		public void handle(ItemClickEvent e) {
-			if(e.getOption().equalsIgnoreCase("drop")) {
-				e.getPlayer().getInventory().removeItems(e.getItem());
-				World.addGroundItem(e.getItem(), new WorldTile(e.getPlayer().getTile()), e.getPlayer());
-				e.getPlayer().getPackets().sendSound(2739, 0, 1);
-				return;
-			}
 			e.getPlayer().getInventory().removeItems(new Item(CASKET, 1));
 			e.getPlayer().getInventory().addItem(new Item(1605, 1), true);//gold ring
 			e.getPlayer().getInventory().addItem(new Item(1635, 1), true);//cut emerald
 		}
 	};
 
-	public static ItemClickHandler readMessage = new ItemClickHandler(PIRATE_MESSAGE) {
+	public static ItemClickHandler readMessage = new ItemClickHandler(new Object[] { PIRATE_MESSAGE }, new String[] { "Read" }) {
 		private final int MESSAGE_INTERFACE = 220;
 		@Override
 		public void handle(ItemClickEvent e) {
-			Player p = e.getPlayer();
-			if(e.getOption().equalsIgnoreCase("drop")) {
-				p.getInventory().removeItems(e.getItem());
-				World.addGroundItem(e.getItem(), new WorldTile(e.getPlayer().getTile()), e.getPlayer());
-				e.getPlayer().getPackets().sendSound(2739, 0, 1);
-				return;
-			}
-			p.getInterfaceManager().sendInterface(MESSAGE_INTERFACE);//Message interface
-			p.getPackets().setIFText(MESSAGE_INTERFACE, 8, "Visit the city of the White Knights. In the park,");
-			p.getPackets().setIFText(MESSAGE_INTERFACE, 9, "Saradomin points to the X which marks the spot.");
-			p.getQuestManager().getAttribs(Quest.PIRATES_TREASURE).setB(KNOWS_TREASURE_LOC_ATTR, true);
+			e.getPlayer().getInterfaceManager().sendInterface(MESSAGE_INTERFACE);//Message interface
+			e.getPlayer().getPackets().setIFText(MESSAGE_INTERFACE, 8, "Visit the city of the White Knights. In the park,");
+			e.getPlayer().getPackets().setIFText(MESSAGE_INTERFACE, 9, "Saradomin points to the X which marks the spot.");
+			e.getPlayer().getQuestManager().getAttribs(Quest.PIRATES_TREASURE).setB(KNOWS_TREASURE_LOC_ATTR, true);
 		}
 	};
 

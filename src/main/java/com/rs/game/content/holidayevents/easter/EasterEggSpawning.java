@@ -21,8 +21,6 @@ import java.util.List;
 import com.rs.cores.CoresManager;
 import com.rs.game.World;
 import com.rs.game.region.Region;
-import com.rs.game.tasks.WorldTask;
-import com.rs.game.tasks.WorldTasks;
 import com.rs.lib.game.GroundItem;
 import com.rs.lib.game.Item;
 import com.rs.lib.game.WorldTile;
@@ -40,13 +38,8 @@ public class EasterEggSpawning {
 
 	//@ServerStartupEvent
 	public static void initSpawning() {
-		WorldTasks.schedule(new WorldTask() {
-			@Override
-			public void run() {
-				for (int id : regionsToSpawn)
-					World.getRegion(id, true);
-			}
-		}, 10);
+		for (int id : regionsToSpawn)
+			World.getRegion(id, true);
 		CoresManager.schedule(() -> {
 			try {
 				spawnEggs();
@@ -76,13 +69,13 @@ public class EasterEggSpawning {
 			for (int i = 0; i < eggsNeeded; i++) {
 				int x = r.getBaseX()+Utils.random(64);
 				int y = r.getBaseY()+Utils.random(64);
-				WorldTile tile = new WorldTile(x, y, 0);
+				WorldTile tile = WorldTile.of(x, y, 0);
 				while (!World.floorAndWallsFree(tile, 1)) {
 					x = r.getBaseX()+Utils.random(64);
 					y = r.getBaseY()+Utils.random(64);
-					tile = new WorldTile(x, y, 0);
+					tile = WorldTile.of(x, y, 0);
 				}
-				World.addGroundItem(new Item(1961), new WorldTile(x, y, 0));
+				World.addGroundItem(new Item(1961), WorldTile.of(x, y, 0));
 			}
 		}
 	}

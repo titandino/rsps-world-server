@@ -22,11 +22,13 @@ import com.rs.lib.util.Utils;
 import com.rs.plugin.annotations.PluginEventHandler;
 import com.rs.plugin.events.ItemOnObjectEvent;
 import com.rs.plugin.events.NPCClickEvent;
+import com.rs.plugin.events.NPCDeathEvent;
 import com.rs.plugin.events.ObjectClickEvent;
 import com.rs.plugin.events.PickupItemEvent;
 import com.rs.plugin.events.PlayerStepEvent;
 import com.rs.plugin.handlers.ItemOnObjectHandler;
 import com.rs.plugin.handlers.NPCClickHandler;
+import com.rs.plugin.handlers.NPCDeathHandler;
 import com.rs.plugin.handlers.ObjectClickHandler;
 import com.rs.plugin.handlers.PickupItemHandler;
 import com.rs.plugin.handlers.PlayerStepHandler;
@@ -34,11 +36,20 @@ import com.rs.utils.Ticks;
 
 @PluginEventHandler
 public class IkovDungeon {
+	
+	public static NPCDeathHandler handlePendant = new NPCDeathHandler(274, 275) {
+		@Override
+		public void handle(NPCDeathEvent e) {
+			if (e.getKiller() instanceof Player p && p.getQuestManager().isComplete(Quest.TEMPLE_OF_IKOV))
+				e.getNPC().sendDrop(p, new Item(87));
+		}
+	};
+	
 	public static ObjectClickHandler handleIkovEmergencyExitLadder = new ObjectClickHandler(new Object[] { 32015 },
-			new WorldTile(2637, 9808, 0)) {
+			WorldTile.of(2637, 9808, 0)) {
 		@Override
 		public void handle(ObjectClickEvent e) {
-			e.getPlayer().useLadder(new WorldTile(2637, 3409, 0));
+			e.getPlayer().useLadder(WorldTile.of(2637, 3409, 0));
 		}
 	};
 
@@ -62,10 +73,10 @@ public class IkovDungeon {
 	};
 
 	public static ObjectClickHandler handleLadderToMcGruborsShed = new ObjectClickHandler(new Object[]{ 32015 },
-			new WorldTile(2659, 9892, 0)) {
+			WorldTile.of(2659, 9892, 0)) {
 		@Override
 		public void handle(ObjectClickEvent e) {
-			e.getPlayer().useLadder(new WorldTile(2658, 3492, 0));
+			e.getPlayer().useLadder(WorldTile.of(2658, 3492, 0));
 		}
 	};
 
@@ -94,7 +105,7 @@ public class IkovDungeon {
 	};
 
 	public static PickupItemHandler handleArmaStaffPickup = new PickupItemHandler(new Object[] { 84 },
-			new WorldTile(2638, 9906, 0)) {
+			WorldTile.of(2638, 9906, 0)) {
 		@Override
 		public void handle(PickupItemEvent e) {
 			for(NPC npc : World.getNPCsInRegion(e.getPlayer().getRegionId()))
@@ -216,8 +227,8 @@ public class IkovDungeon {
 		}
 	};
 
-	public static PlayerStepHandler handleBridge = new PlayerStepHandler(new WorldTile(2650, 9828, 0), new WorldTile(2650, 9829, 0),
-			new WorldTile(2647, 9828, 0), new WorldTile(2647, 9829, 0)) {
+	public static PlayerStepHandler handleBridge = new PlayerStepHandler(WorldTile.of(2650, 9828, 0), WorldTile.of(2650, 9829, 0),
+			WorldTile.of(2647, 9828, 0), WorldTile.of(2647, 9829, 0)) {
 		@Override
 		public void handle(PlayerStepEvent e) {
 			Player p = e.getPlayer();
@@ -228,7 +239,7 @@ public class IkovDungeon {
 			p.getTempAttribs().setB("CrossingIkovBridge", true);
 			WorldTasks.scheduleTimer(i -> {
 				if(i == 1)
-					p.addWalkSteps(new WorldTile((e.getTile().getX() == 2650 ? 2647 : 2650), e.getTile().getY(), 0), 4, false);
+					p.addWalkSteps(WorldTile.of((e.getTile().getX() == 2650 ? 2647 : 2650), e.getTile().getY(), 0), 4, false);
 				if(i == 2 && p.getWeight() > 0) {
 					p.resetWalkSteps();
 					p.sendMessage("The bridge gives way under the weight...");
@@ -237,7 +248,7 @@ public class IkovDungeon {
 				}
 				if(i == 4  && p.getWeight() > 0) {
 					p.sendMessage("Good thing the lava was shallow!");
-					p.setNextWorldTile(new WorldTile(2648, 9826, 0));
+					p.setNextWorldTile(WorldTile.of(2648, 9826, 0));
 					p.setRunHidden(true);
 					p.getTempAttribs().removeB("CrossingIkovBridge");
 					return false;

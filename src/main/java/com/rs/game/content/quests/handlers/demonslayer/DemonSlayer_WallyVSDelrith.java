@@ -58,7 +58,7 @@ public class DemonSlayer_WallyVSDelrith extends Controller {
     }
 
 	private void playCutscene() {
-		locationBeforeCutscene = new WorldTile(player.getX(), player.getY(), player.getPlane());
+		locationBeforeCutscene = WorldTile.of(player.getX(), player.getY(), player.getPlane());
 		player.lock();
 		instance = new DynamicRegionReference(4, 4);
 		instance.copyMapAllPlanes(401, 419, () -> {
@@ -73,7 +73,7 @@ public class DemonSlayer_WallyVSDelrith extends Controller {
 				public void run() {
 					if (tick == 0) { // setup p1
 						player.getInterfaceManager().fadeIn();
-						player.getPackets().sendMusic(-1, 100, 255);
+						player.musicTrack(-1);
 					} else if (tick == 3) {// setup p2, move player
 						player.getPackets().setBlockMinimapState(2);
 						player.setNextWorldTile(spawn);
@@ -84,8 +84,8 @@ public class DemonSlayer_WallyVSDelrith extends Controller {
 						player.getPackets().sendCameraLook(player.getXInScene(player.getSceneBaseChunkId()) + 4, player.getYInScene(player.getSceneBaseChunkId()) - 4, 50);
 					} else if (tick == 6) {// start scene
 						player.getInterfaceManager().fadeOut();
-						player.getPackets().sendMusic(196, 100, 255);
-						npc = World.spawnNPC(WALLY, new WorldTile(player.getX() - 1, player.getY() - 5, player.getPlane()), -1, false, true);
+						player.musicTrack(196);
+						npc = World.spawnNPC(WALLY, WorldTile.of(player.getX() - 1, player.getY() - 5, player.getPlane()), -1, false, true);
 						npc.setRandomWalk(false);
 					} else if (tick == 7)
 						player.startConversation(new Conversation(player) {
@@ -100,7 +100,7 @@ public class DemonSlayer_WallyVSDelrith extends Controller {
 					else if (tick == 8) { // Wally #1
 						npc.faceEntity(player);
 						npc.setRun(true);
-						npc.setForceWalk(new WorldTile(spawn.getX(), spawn.getY() - 2, spawn.getPlane()));
+						npc.setForceWalk(WorldTile.of(spawn.getX(), spawn.getY() - 2, spawn.getPlane()));
 						player.startConversation(new Conversation(player) {
 							{
 								addNPC(WALLY, HeadE.TALKING_ALOT, "Die foul demon!");
@@ -146,7 +146,7 @@ public class DemonSlayer_WallyVSDelrith extends Controller {
 					} else if (tick == 21)
 						player.getInterfaceManager().removeInterface(115);
 					else if (tick == 22) {
-						npc.faceTile(new WorldTile(spawn.getX() - 1, spawn.getY() - 3, 0));// face camera
+						npc.faceTile(WorldTile.of(spawn.getX() - 1, spawn.getY() - 3, 0));// face camera
 						npc.setNextAnimation(new Animation(12625));
 						player.startConversation(new Conversation(player) { // Wally #2
 							{
@@ -175,7 +175,7 @@ public class DemonSlayer_WallyVSDelrith extends Controller {
 						player.getPackets().sendStopCameraShake();
 					} else if (tick == 27) {// closing p2
 						player.getInterfaceManager().setFadingInterface(170);
-						player.getPackets().sendMusic(125, 100, 255);
+						player.musicTrack(125);
 						player.getTempAttribs().setB("DemonSlayerCutscenePlayed", true);
 						player.startConversation(new GypsyArisDemonSlayerD(player, 1).getStart());
 						player.unlock();

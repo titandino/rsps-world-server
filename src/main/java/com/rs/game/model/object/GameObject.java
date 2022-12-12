@@ -65,7 +65,7 @@ public class GameObject extends WorldObject {
 
 	@Override
 	public int hashCode() {
-		int hash = getTileHash();
+		int hash = tile.getTileHash();
 		hash = ((hash << 5) - hash) + id;
 		hash = ((hash << 5) - hash) + rotation;
 		hash = ((hash << 5) - hash) + type.id;
@@ -89,8 +89,11 @@ public class GameObject extends WorldObject {
 	
 	public ObjectMeshModifier modifyMesh() {
 		this.meshModifier = new ObjectMeshModifier(this);
-		World.refreshObject(this);
 		return this.meshModifier;
+	}
+	
+	public void refresh() {
+		World.refreshObject(this);
 	}
 
 	public void setIdTemporary(int id, int ticks) {
