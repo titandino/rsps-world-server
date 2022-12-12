@@ -27,30 +27,30 @@ public class Home {
 	@ServerStartupEvent
 	public static void spawnNPCs() {
 		/* Task master */
-		//spawnNPC(14858, new WorldTile(3090, 3494, 0), "Cadet Cassandra", Direction.WEST, false);
+		//spawnNPC(14858, WorldTile.of(3090, 3494, 0), "Cadet Cassandra", Direction.WEST, false);
 		
 		/* Slayer Masters */
-		spawnNPC(8480, new WorldTile(3091, 3487, 0), Direction.SOUTH, false);
-		spawnNPC(8481, new WorldTile(3092, 3487, 0), Direction.SOUTH, false);
-		spawnNPC(1597, new WorldTile(3093, 3487, 0), Direction.SOUTH, false);
-		spawnNPC(1598, new WorldTile(3094, 3487, 0), Direction.SOUTH, false);
-		spawnNPC(7779, new WorldTile(3095, 3487, 0), Direction.SOUTH, false);
-		spawnNPC(8466, new WorldTile(3096, 3487, 0), Direction.SOUTH, false);
-		spawnNPC(9085, new WorldTile(3097, 3487, 0), Direction.SOUTH, false);
-		spawnNPC(15661, new WorldTile(3082, 3490, 0), Direction.EAST, false);
+		spawnNPC(8480, WorldTile.of(3091, 3487, 0), Direction.SOUTH, false);
+		spawnNPC(8481, WorldTile.of(3092, 3487, 0), Direction.SOUTH, false);
+		spawnNPC(1597, WorldTile.of(3093, 3487, 0), Direction.SOUTH, false);
+		spawnNPC(1598, WorldTile.of(3094, 3487, 0), Direction.SOUTH, false);
+		spawnNPC(7779, WorldTile.of(3095, 3487, 0), Direction.SOUTH, false);
+		spawnNPC(8466, WorldTile.of(3096, 3487, 0), Direction.SOUTH, false);
+		spawnNPC(9085, WorldTile.of(3097, 3487, 0), Direction.SOUTH, false);
+		spawnNPC(15661, WorldTile.of(3082, 3490, 0), Direction.EAST, false);
 
 		/* GE Clarks */
-		spawnNPC(2240, new WorldTile(3096, 3492, 0), Direction.WEST, false);
-		spawnNPC(2241, new WorldTile(3096, 3490, 0), Direction.WEST, false);
-		spawnNPC(2593, new WorldTile(3096, 3494, 0), Direction.NORTHWEST, false);
-		spawnNPC(2240, new WorldTile(3098, 3494, 0), Direction.NORTH, false);
-		spawnNPC(2241, new WorldTile(3096, 3488, 0), Direction.WEST, false);
+		spawnNPC(2240, WorldTile.of(3096, 3492, 0), Direction.WEST, false);
+		spawnNPC(2241, WorldTile.of(3096, 3490, 0), Direction.WEST, false);
+		spawnNPC(2593, WorldTile.of(3096, 3494, 0), Direction.NORTHWEST, false);
+		spawnNPC(2240, WorldTile.of(3098, 3494, 0), Direction.NORTH, false);
+		spawnNPC(2241, WorldTile.of(3096, 3488, 0), Direction.WEST, false);
 
 		/* Loyalty point shop */
-		spawnNPC(13727, new WorldTile(3091, 3505, 0), Direction.SOUTH, false);
+		spawnNPC(13727, WorldTile.of(3091, 3505, 0), Direction.SOUTH, false);
 	}
 
-	public static ObjectClickHandler handleShops = new ObjectClickHandler(new Object[] { 18789 }, new WorldTile(3095, 3499, 0)) {
+	public static ObjectClickHandler handleShops = new ObjectClickHandler(new Object[] { 18789 }, WorldTile.of(3095, 3499, 0)) {
 		@Override
 		public void handle(ObjectClickEvent e) {
 			e.getPlayer().startConversation(new Dialogue().addOptions("Which shops would you like to see?", new Options() {
@@ -75,24 +75,24 @@ public class Home {
 	};
 
 	private static Teleport[] PVP_TELEPORTS = {
-			new Teleport("Mage bank (SAFE)", new WorldTile(2539, 4715, 0)),
-			new Teleport("Clan Wars (SAFE)", new WorldTile(2997, 9680, 0)),
-			new Teleport("Wests (level 10)", new WorldTile(2976, 3597, 0), p -> p.getControllerManager().startController(new WildernessController())),
-			new Teleport("Chaos altar (level 12)", new WorldTile(3229, 3609, 0), p -> p.getControllerManager().startController(new WildernessController())),
-			new Teleport("Dark warrior's fortress (level 15)", new WorldTile(3007, 3632, 0), p -> p.getControllerManager().startController(new WildernessController())),
+			new Teleport("Mage bank (SAFE)", WorldTile.of(2539, 4715, 0)),
+			new Teleport("Clan Wars (SAFE)", WorldTile.of(2997, 9680, 0)),
+			new Teleport("Wests (level 10)", WorldTile.of(2976, 3597, 0), p -> p.getControllerManager().startController(new WildernessController())),
+			new Teleport("Chaos altar (level 12)", WorldTile.of(3229, 3609, 0), p -> p.getControllerManager().startController(new WildernessController())),
+			new Teleport("Dark warrior's fortress (level 15)", WorldTile.of(3007, 3632, 0), p -> p.getControllerManager().startController(new WildernessController())),
 
-			new Teleport("Revenant caves (level 18)", new WorldTile(3082, 10058, 0), p -> p.getControllerManager().startController(new WildernessController())),
-			new Teleport("Easts (level 19)", new WorldTile(3350, 3667, 0), p -> p.getControllerManager().startController(new WildernessController())),
-			new Teleport("West Lava Maze/KBD (level 40)", new WorldTile(3028, 3839, 0), p -> p.getControllerManager().startController(new WildernessController())),
-			new Teleport("Red Dragon Isle (level 43)", new WorldTile(3202, 3860, 0), p -> p.getControllerManager().startController(new WildernessController())),
+			new Teleport("Revenant caves (level 18)", WorldTile.of(3082, 10058, 0), p -> p.getControllerManager().startController(new WildernessController())),
+			new Teleport("Easts (level 19)", WorldTile.of(3350, 3667, 0), p -> p.getControllerManager().startController(new WildernessController())),
+			new Teleport("West Lava Maze/KBD (level 40)", WorldTile.of(3028, 3839, 0), p -> p.getControllerManager().startController(new WildernessController())),
+			new Teleport("Red Dragon Isle (level 43)", WorldTile.of(3202, 3860, 0), p -> p.getControllerManager().startController(new WildernessController())),
 
-			new Teleport("Agility course (level 49)", new WorldTile(2997, 3909, 0), p -> p.getControllerManager().startController(new WildernessController())),
+			new Teleport("Agility course (level 49)", WorldTile.of(2997, 3909, 0), p -> p.getControllerManager().startController(new WildernessController())),
 			null,
 			null,
 			null
 	};
 	
-	public static ObjectClickHandler healingWell = new ObjectClickHandler(new Object[] { 28715 }, new WorldTile(3080, 3487, 0)) {
+	public static ObjectClickHandler healingWell = new ObjectClickHandler(new Object[] { 28715 }, WorldTile.of(3080, 3487, 0)) {
 		@Override
 		public void handle(ObjectClickEvent e) {
 			e.getPlayer().sendMessage("You feel refreshed.");
@@ -115,7 +115,7 @@ public class Home {
 		}
 	};
 
-	public static ObjectClickHandler pvpPortal = new ObjectClickHandler(new Object[] { 46935 }, new WorldTile(3093, 3506, 0)) {
+	public static ObjectClickHandler pvpPortal = new ObjectClickHandler(new Object[] { 46935 }, WorldTile.of(3093, 3506, 0)) {
 		@Override
 		public void handle(ObjectClickEvent e) {
 			e.getPlayer().startConversation(new Dialogue()
@@ -133,7 +133,7 @@ public class Home {
 		}
 	};
 
-	public static ObjectClickHandler bossPortal = new ObjectClickHandler(new Object[] { 46933 }, new WorldTile(3083, 3492, 0)) {
+	public static ObjectClickHandler bossPortal = new ObjectClickHandler(new Object[] { 46933 }, WorldTile.of(3083, 3492, 0)) {
 		@Override
 		public void handle(ObjectClickEvent e) {
 			if (e.getPlayer().getBossTask() == null || e.getPlayer().getBossTask().getTask() == null) {
@@ -156,7 +156,7 @@ public class Home {
 		}
 	};
 
-	public static ObjectClickHandler slayerPortal = new ObjectClickHandler(new Object[] { 46934 }, new WorldTile(3095, 3483, 0)) {
+	public static ObjectClickHandler slayerPortal = new ObjectClickHandler(new Object[] { 46934 }, WorldTile.of(3095, 3483, 0)) {
 		@Override
 		public void handle(ObjectClickEvent e) {
 			if (e.getPlayer().getSlayer().getTask() == null) {
