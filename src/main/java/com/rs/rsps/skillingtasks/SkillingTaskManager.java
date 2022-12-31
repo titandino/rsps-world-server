@@ -1,9 +1,6 @@
 package com.rs.rsps.skillingtasks;
 
 import com.rs.cache.loaders.NPCDefinitions;
-import com.rs.game.content.dialogue.Dialogue;
-import com.rs.game.content.dialogue.HeadE;
-import com.rs.game.content.dialogue.Options;
 import com.rs.game.content.skills.cooking.Cooking;
 import com.rs.game.content.skills.crafting.GemCutting;
 import com.rs.game.content.skills.farming.HarvestPatch;
@@ -13,6 +10,9 @@ import com.rs.game.content.skills.herblore.Herblore;
 import com.rs.game.content.skills.mining.Mining;
 import com.rs.game.content.skills.smithing.Smithing;
 import com.rs.game.content.skills.woodcutting.Woodcutting;
+import com.rs.game.engine.dialogue.Dialogue;
+import com.rs.game.engine.dialogue.HeadE;
+import com.rs.game.engine.dialogue.Options;
 import com.rs.game.model.entity.actions.Action;
 import com.rs.game.model.entity.player.Player;
 import com.rs.game.model.entity.player.Skills;
