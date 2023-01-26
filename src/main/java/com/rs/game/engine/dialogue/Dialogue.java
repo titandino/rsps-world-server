@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 
 import com.rs.game.content.world.unorganized_dialogue.StageSelectDialogue;
 import com.rs.game.engine.dialogue.statements.ItemStatement;
+import com.rs.game.engine.dialogue.statements.MakeXStatement;
 import com.rs.game.engine.dialogue.statements.NPCStatement;
 import com.rs.game.engine.dialogue.statements.OptionStatement;
 import com.rs.game.engine.dialogue.statements.PlayerStatement;
@@ -154,6 +155,22 @@ public class Dialogue {
 		});
 	}
 	
+	public Dialogue addMakeX(int[] itemIds, int maxAmt) {
+		return addNext(new MakeXStatement(itemIds, maxAmt));
+	}
+	
+	public Dialogue addMakeX(int itemId, int maxAmt) {
+		return addMakeX(new int[] { itemId }, maxAmt);
+	}
+	
+	public Dialogue addMakeX(int[] itemIds) {
+		return addMakeX(itemIds, 60);
+	}
+	
+	public Dialogue addMakeX(int itemId) {
+		return addMakeX(new int[] { itemId }, 60);
+	}
+	
 	public Dialogue addOptions(Consumer<Options> create) {
 		Options options = new Options() {
 			@Override
@@ -176,6 +193,16 @@ public class Dialogue {
 			}
 		};
 		return addOptions(title, options);
+	}
+	
+	public Dialogue addOptions(Conversation conversation, String stageName, Consumer<Options> create) {
+		Options options = new Options(stageName, conversation) {
+			@Override
+			public void create() {
+				create.accept(this);
+			}
+		};
+		return addOptions(Conversation.DEFAULT_OPTIONS_TITLE, options);
 	}
 	
 	public Dialogue addOptions(String stageName, Conversation conv, String title, Consumer<Options> create) {

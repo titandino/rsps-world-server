@@ -24,7 +24,6 @@ import com.rs.game.World;
 import com.rs.game.engine.dialogue.HeadE;
 import com.rs.game.model.entity.Hit;
 import com.rs.game.model.entity.Hit.HitLook;
-import com.rs.game.model.entity.actions.FightPitsViewingOrb;
 import com.rs.game.model.entity.npc.NPC;
 import com.rs.game.model.entity.player.Player;
 import com.rs.game.tasks.WorldTask;
@@ -34,7 +33,6 @@ import com.rs.lib.game.WorldTile;
 import com.rs.lib.util.Logger;
 import com.rs.lib.util.Utils;
 import com.rs.plugin.annotations.PluginEventHandler;
-import com.rs.plugin.events.ButtonClickEvent;
 import com.rs.plugin.handlers.ButtonClickHandler;
 import com.rs.utils.Ticks;
 
@@ -53,15 +51,12 @@ public final class FightPits {
 
 	private static WorldTile[] GAME_TELEPORTS = { WorldTile.of(4577, 5086, 0), WorldTile.of(4571, 5083, 0), WorldTile.of(4564, 5086, 0), WorldTile.of(4564, 5097, 0), WorldTile.of(4571, 5101, 0), WorldTile.of(4578, 5097, 0) };
 
-	public static ButtonClickHandler handleFightPitsViewingOrbButtons = new ButtonClickHandler(374) {
-		@Override
-		public void handle(ButtonClickEvent e) {
-			if (e.getComponentId() >= 5 && e.getComponentId() <= 9)
-				e.getPlayer().setNextWorldTile(WorldTile.of(FightPitsViewingOrb.ORB_TELEPORTS[e.getComponentId() - 5]));
-			else if (e.getComponentId() == 15)
-				e.getPlayer().stopAll();
-		}
-	};
+	public static ButtonClickHandler handleFightPitsViewingOrbButtons = new ButtonClickHandler(374, e -> {
+		if (e.getComponentId() >= 5 && e.getComponentId() <= 9)
+			e.getPlayer().setNextWorldTile(WorldTile.of(FightPitsViewingOrb.ORB_TELEPORTS[e.getComponentId() - 5]));
+		else if (e.getComponentId() == 15)
+			e.getPlayer().stopAll();
+	});
 
 	private static class GameTask extends WorldTask {
 
